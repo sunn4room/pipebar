@@ -4,7 +4,7 @@ Pipebar is a Wayland statusbar reading content from STDIN and sending event acti
 
 ## Build
 
-```
+```sh
 make
 ```
 
@@ -53,5 +53,40 @@ control characters are:
         U               restore current control state to the marked
         D               restore current control state to default
         I               the delimeter between left/center and center/right block
+```
+
+## Example
+
+* use i3blocks as producer
+* use niri spawn as consumer
+
+i3blocks config
+
+```
+[left]
+command=printf 'left\n'
+interval=once
+
+[sep1]
+command=printf '\x1fI\x1f\n'
+interval=once
+
+[center]
+command=printf 'center\n'
+interval=once
+
+[sep2]
+command=printf '\x1fI\x1f\n'
+interval=once
+
+[right]
+command=printf 'right\n'
+interval=once
+```
+
+run pipebar
+
+```sh
+i3blocks | sed --unbuffered -e '1d' -e 's/^.//' | jq --unbuffered -r 'reduce .[] as $item (""; . + $item.full_text)' | pipebar | while read -r cmd; do niri msg action spawn-sh -- "$cmd"; done
 ```
 
