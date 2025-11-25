@@ -18,7 +18,7 @@
 #include "protocols/wlr-layer-shell.h"
 #include "protocols/xdg-shell.h"
 
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 #define CHAR_SIZE 1024
 #define BLOCK_SIZE 32
 
@@ -646,6 +646,7 @@ static void init() {
         fprintf(stderr, "        n               close action 1/2/3/4/5/6/7 area\n");
         fprintf(stderr, "        M               mark the current control state\n");
         fprintf(stderr, "        U               restore current control state to the marked\n");
+        fprintf(stderr, "        D               restore current control state to default\n");
         fprintf(stderr, "        I               the delimeter between left/center and center/right block\n");
         fprintf(stderr, "\n");
         exit(CODE_FOR_NORMAL);

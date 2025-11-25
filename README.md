@@ -20,7 +20,7 @@ Ensure that you have the following dependencies:
 
 ```
 Pipebar is a Wayland statusbar reading content from STDIN and sending event action to STDOUT.
-pipebar version 0.1.0
+pipebar version 0.1.1
 
 usage: <producer> | pipebar [options] | <consumer>
 options are:
@@ -51,6 +51,7 @@ control characters are:
         n               close action 1/2/3/4/5/6/7 area
         M               mark the current control state
         U               restore current control state to the marked
+        D               restore current control state to default
         I               the delimeter between left/center and center/right block
 ```
 
