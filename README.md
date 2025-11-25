@@ -64,7 +64,7 @@ i3blocks config
 
 ```
 [left]
-command=printf 'left\n'
+command=printf '\x1f1notify-send left\x1fleft\n'
 interval=once
 
 [sep1]
@@ -72,7 +72,7 @@ command=printf '\x1fI\x1f\n'
 interval=once
 
 [center]
-command=printf 'center\n'
+command=printf '\x1f1notify-send center\x1fcenter\n'
 interval=once
 
 [sep2]
@@ -80,7 +80,7 @@ command=printf '\x1fI\x1f\n'
 interval=once
 
 [right]
-command=printf 'right\n'
+command=printf '\x1f1notify-send right\x1fright\n'
 interval=once
 ```
 
