@@ -20,7 +20,7 @@ Ensure that you have the following dependencies:
 
 ```
 Pipebar is a Wayland statusbar reading content from STDIN and sending event action to STDOUT.
-pipebar version 0.1.1
+pipebar version 0.1.2
 
 usage: <producer> | pipebar [options] | <consumer>
 options are:

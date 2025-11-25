@@ -18,7 +18,7 @@
 #include "protocols/wlr-layer-shell.h"
 #include "protocols/xdg-shell.h"
 
-#define VERSION "0.1.1"
+#define VERSION "0.1.2"
 #define CHAR_SIZE 1024
 #define BLOCK_SIZE 32
 
@@ -662,6 +662,8 @@ static void init() {
         fprintf(stderr, "$WAYLAND_DISPLAY is NULL.\n");
         exit(CODE_FOR_INNER_ERROR);
     }
+
+    setvbuf(stdout, NULL, _IOLBF, 0);
 }
 
 static void override(struct bar *bar, int argc, char **argv) {
