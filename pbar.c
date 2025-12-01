@@ -1,3 +1,4 @@
+#include <fcft/fcft.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,7 @@ static void quit(struct bar* bar, const int code, const char* restrict fmt, ...)
         va_end(ap);
     }
 
+    fcft_fini();
     exit(code);
 }
 
@@ -55,6 +57,11 @@ static void pipe_init(struct bar* bar)
 static void init(struct bar* bar)
 {
     pipe_init(bar);
+
+    fcft_init(FCFT_LOG_COLORIZE_AUTO, false, FCFT_LOG_CLASS_ERROR);
+    if (!(fcft_capabilities() & FCFT_CAPABILITY_TEXT_RUN_SHAPING)) {
+        quit(bar, INNER_ERROR, "fcft does not support text-run shaping.\n");
+    }
 }
 
 int main(int argc, char** argv)
