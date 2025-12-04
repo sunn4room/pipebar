@@ -2,6 +2,17 @@
 
 A featherweight text-rendering wayland statusbar. `p` indicates that pbar works with anonymous pipe `|`. This bar is highly customizable and extensible.
 
+## build
+
+- pkg-config
+- wayland
+- fcft
+- pixman
+
+```sh
+make
+```
+
 ## usage
 
 ```
