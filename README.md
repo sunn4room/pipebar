@@ -18,29 +18,42 @@ make
 
 ```
 pbar is a featherweight text-rendering wayland statusbar.
-pbar recieves utf-8 sequence from STDIN and sends pointer event actions to STDOUT.
+pbar renders utf-8 sequence from STDIN and prints pointer event actions to STDOUT.
 sequence between a pair of '\x1f' will be escaped instead of being rendered directly.
 
-        version         1.0
+        version         2.0
         usage           producer | pbar [options] | consumer
 
 options are:
-        -B color        set default background color (000000ff)
-        -F color        set default foreground color (ffffffff)
-        -T font         set default font (monospace)
+        -c color,color  set colors list (000000ff,ffffffff)
+        -f font,font    set fonts list (monospace)
         -o output       set wayland output
         -s seat         set wayland seat
         -b              place the bar at the bottom
         -g gap          set margin gap (0)
         -i interval     set pointer event throttle interval in ms (100)
+        -r rep_str      set the replace string for action ({})
+
+color can be:
+        rrggbb          without alpha
+        rrggbbaa        with alpha
+
+font can be: (see 'man fcft_from_name')
+        name            font name
+        name:k=v        with single attribute
+        name:k=v:k=v    with multiple attributes
+
+environment variable:
+        PBAR_COLORS     set colors list
+        PBAR_FONTS      set fonts list
 
 escape sequence can be:
-        Bcolor          set background color
-        B               restore last background color
-        Fcolor          set foreground color
-        F               restore last foreground color
-        Tfont           set font
-        T               restore last font
+        Bindex          set background color index
+        B               restore last background color index
+        Findex          set foreground color index
+        F               restore last foreground color index
+        Tindex          set font index
+        T               restore last font index
         1action         set left button click action
         1               restore last left button click action
         2action         set middle button click action
@@ -58,18 +71,14 @@ escape sequence can be:
         R               swap background color and foreground color
         D               delimiter between left/center and center/right part
 
-color can be:
-        rrggbb          without alpha
-        rrggbbaa        with alpha
-
-font can be: (see 'man fcft_from_name')
-        name            font name
-        name:k=v        with single attribute
-        name:k=v:k=v    with multiple attributes
+index can be:
+        0               the first item in colors/fonts list
+        1               the second item in colors/fonts list
+        ...             ...
 
 action can be:
         xxx             anything except for '\x1f'
-        xxx {}          {} will be replaced with pointer x-coordinate
+        xxx rep_str     rep_str will be replaced with pointer x-coordinate
 ```
 
 ## example
