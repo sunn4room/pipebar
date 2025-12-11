@@ -61,7 +61,7 @@ Valid escape sequences are:
         F               restore to last foreground color index
         Tindex          set font index (initially 0)
         T               restore to last font index
-        Ooutput         set exclusive wayland output (initially NULL)
+        Ooutput         set wayland output (initially NULL)
         O               restore to last wayland output
         1action         set left button click action (initially NULL)
         1               restore to last left button click action

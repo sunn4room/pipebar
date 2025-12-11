@@ -787,7 +787,7 @@ static void set_pipe()
             "        F               restore to last foreground color index\n"
             "        Tindex          set font index (initially 0)\n"
             "        T               restore to last font index\n"
-            "        Ooutput         set exclusive wayland output (initially NULL)\n"
+            "        Ooutput         set wayland output (initially NULL)\n"
             "        O               restore to last wayland output\n"
             "        1action         set left button click action (initially NULL)\n"
             "        1               restore to last left button click action\n"
@@ -987,8 +987,14 @@ static void draw(struct bar* bar)
         wl_list_for_each_reverse(entry, &pbar.part[part_idx], link)
         {
             if (entry->text[0] == '\0') continue;
-            const char* entry_output = entry->item[ITEM_OUTPUT].value;
-            if (entry_output != NULL && strcmp(entry_output, bar->name) != 0) continue;
+            if (entry->item[ITEM_OUTPUT].value != NULL) {
+                struct entry* each = entry;
+                do {
+                    if (strcmp(each->item[ITEM_OUTPUT].value, bar->name) == 0) break;
+                    each = wl_container_of(each->item[ITEM_OUTPUT].last, each, link);
+                } while (each->item[ITEM_OUTPUT].value != NULL);
+                if (each->item[ITEM_OUTPUT].value == NULL) continue;
+            }
 
             block = wl_container_of(&bar->part[PART_SIZE].prev, block, link);
             if (&block->link == &bar->part[PART_SIZE]) {
@@ -1139,7 +1145,6 @@ static void init(int argc, char** argv)
     pbar_init();
 
     pbar.version = "3.0";
-    pbar.debug = true;
 
     pbar.colors = default_colors;
     pbar.fonts = default_fonts;
