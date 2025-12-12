@@ -19,7 +19,6 @@ make
 ## usage
 
 ```
-
 Pbar is a featherweight text-rendering wayland statusbar.
 It renders utf-8 sequence from STDIN line by line.
 It prints mouse pointer event actions to STDOUT.
@@ -89,6 +88,42 @@ action can be:
         xxx             anything except for '\x1f'
 ```
 
+## convention
+
+Considering the extensibility of pbar, I make the following conventions.
+
+### color list
+
+Inspired by base16 theme.
+
+- bg1
+- fg1
+- bg2
+- fg2
+- bg3
+- fg3
+- bg4
+- fg4
+- red
+- orange
+- yellow
+- green
+- cyan
+- blue
+- purple
+- brown
+- ...
+
+There are some theme definitions in the themes folder.
+
+### font list
+
+- biggest monospace
+- biggest sans-serif
+- smaller monospace
+- smaller sans-serif
+- ...
+
 ## example
 
 - use ***i3blocks*** as the producer
@@ -98,3 +133,4 @@ action can be:
 i3blocks | sed --unbuffered -e '1d' -e 's/^.//' | jq --unbuffered -r 'reduce .[] as $item (""; . + $item.full_text)' | pbar | while read -r cmd; do niri msg action spawn-sh -- "$cmd"; done
 ```
 
+There are some useful scripts in the blocks folder.
