@@ -23,7 +23,7 @@ Pbar is a featherweight text-rendering wayland statusbar.
 It renders utf-8 sequence from STDIN line by line.
 It prints mouse pointer event actions to STDOUT.
 
-        version         3.2
+        version         3.3
         usage           producer | pbar [options] | consumer
 
 Options are:

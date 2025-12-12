@@ -1160,7 +1160,7 @@ static void init(int argc, char** argv)
 {
     pbar_init();
 
-    pbar.version = "3.2";
+    pbar.version = "3.3";
 
     pbar.colors = default_colors;
     pbar.fonts = default_fonts;
