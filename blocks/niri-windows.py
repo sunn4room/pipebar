@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# i3blocks config
+# [niri-windows]
+# command=./niri-windows.py
+# interval=persist
+
 import json
 import subprocess
 
@@ -154,7 +159,7 @@ for line in event_stream.stdout:
                 if not workspace["is_active"]:
                     if workspace["is_urgent"]:
                         result = result + f"\x1fF8\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
-                    else:
+                    elif "windows" in workspace:
                         result = result + f"\x1fF7\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
                 else:
                     if "windows" not in workspace:
