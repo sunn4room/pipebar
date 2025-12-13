@@ -29,7 +29,8 @@ def get_icon(key):
         "footclient": "",
         "Obsidian": "",
         "lf": "",
-        "btop++": "",
+        "btop": "",
+        "htop": "",
         "VirtualBox Manager": "󰍺",
         "VirtualBox Machine": "󰍹",
     }
@@ -154,24 +155,27 @@ for line in event_stream.stdout:
         for output in info:
             result = result + f"\x1fO{output}\x1f"
             for workspace_idx, workspace in sorted(info[output].items()):
+                workspace_action = f"niri msg action focus-workspace {workspace_idx}"
                 if not workspace["is_active"]:
                     if workspace["is_urgent"]:
-                        result = result + f"\x1fF8\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
+                        result = result + f"\x1fF8\x1f\x1f1{workspace_action}\x1f  {get_icon(workspace_idx)}  \x1f1\x1f\x1fF\x1f"
                     elif "windows" in workspace:
-                        result = result + f"\x1fF15\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
+                        result = result + f"\x1fF15\x1f\x1f1{workspace_action}\x1f  {get_icon(workspace_idx)}  \x1f1\x1f\x1fF\x1f"
                     else:
-                        result = result + f"\x1fF7\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
+                        result = result + f"\x1fF6\x1f\x1f1{workspace_action}\x1f  {get_icon(workspace_idx)}  \x1f1\x1f\x1fF\x1f"
                 else:
                     if "windows" not in workspace:
                         result = result + f"\x1fF1\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
                     else:
                         for _, column in sorted(workspace["windows"].items()):
                             for _, window in sorted(column.items()):
+                                window_action1 = f"niri msg action focus-window --id {window["id"]}"
+                                window_action3 = f"niri msg action close-window --id {window["id"]}"
                                 if window["id"] == workspace["active_window_id"]:
-                                    result = result + f"\x1fF1\x1f\x1fB4\x1f  {get_icon(window["app_id"])}  \x1fF\x1f\x1fB\x1f"
+                                    result = result + f"\x1fF1\x1f\x1fB4\x1f\x1f3{window_action3}\x1f  {get_icon(window["app_id"])}  \x1f3\x1f\x1fF\x1f\x1fB\x1f"
                                 elif window["is_urgent"]:
-                                    result = result + f"\x1fF8\x1f  {get_icon(window["app_id"])}  \x1fF\x1f"
+                                    result = result + f"\x1fF8\x1f\x1f1{window_action1}\x1f  {get_icon(window["app_id"])}  \x1f1\x1f\x1fF\x1f"
                                 else:
-                                    result = result + f"\x1fF1\x1f  {get_icon(window["app_id"])}  \x1fF\x1f"
+                                    result = result + f"\x1fF1\x1f\x1f1{window_action1}\x1f  {get_icon(window["app_id"])}  \x1f1\x1f\x1fF\x1f"
             result = result + f"\x1fO\x1f"
         print(f"\x1fT1\x1f{result}\x1fT\x1f", flush=True)
