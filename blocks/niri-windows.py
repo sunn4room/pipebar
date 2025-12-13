@@ -141,8 +141,6 @@ for line in event_stream.stdout:
             if window["is_floating"]:
                 continue
             workspace = workspaces[window["workspace_id"]]
-            if not workspace["is_active"]:
-                continue
             if "windows" not in info[workspace["output"]][workspace["idx"]]:
                 info[workspace["output"]][workspace["idx"]]["windows"] = {}
             if window["layout"]["pos_in_scrolling_layout"][0] not in info[workspace["output"]][workspace["idx"]]["windows"]:
@@ -160,6 +158,8 @@ for line in event_stream.stdout:
                     if workspace["is_urgent"]:
                         result = result + f"\x1fF8\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
                     elif "windows" in workspace:
+                        result = result + f"\x1fF15\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
+                    else:
                         result = result + f"\x1fF7\x1f  {get_icon(workspace_idx)}  \x1fF\x1f"
                 else:
                     if "windows" not in workspace:
