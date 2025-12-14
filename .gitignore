@@ -1,7 +1,7 @@
 /.cache/
 /compile_commands.json
-/pbar
-/pbar-debug
+/pipebar
+/pipebar-debug
 /input
 /protocols/*.h
 /protocols/*.c

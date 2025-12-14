@@ -1,10 +1,10 @@
-all: pbar
+all: pipebar
 
-pbar: pbar.c protocols/*.h protocols/*.c
-	gcc -o pbar pbar.c protocols/*.c `pkg-config --libs --cflags wayland-client pixman-1 fcft`
+pipebar: pipebar.c protocols/*.h protocols/*.c
+	gcc -o pipebar pipebar.c protocols/*.c `pkg-config --libs --cflags wayland-client pixman-1 fcft`
 
-pbar-debug: pbar.c protocols/*.h protocols/*.c
-	gcc -g -o pbar-debug pbar.c protocols/*.c `pkg-config --libs --cflags wayland-client pixman-1 fcft`
+pipebar-debug: pipebar.c protocols/*.h protocols/*.c
+	gcc -g -o pipebar-debug pipebar.c protocols/*.c `pkg-config --libs --cflags wayland-client pixman-1 fcft`
 
 protocols/*.h: protocols/*.xml
 	wayland-scanner client-header protocols/xdg-shell-stable.xml protocols/xdg-shell.h
@@ -19,4 +19,4 @@ protocols/*.c: protocols/*.xml
 	wayland-scanner private-code protocols/fractional-scale-staging-v1.xml protocols/fractional-scale.c
 
 clean:
-	rm -f pbar protocols/*.h protocols/*.c
+	rm -f pipebar pipebar-debug protocols/*.h protocols/*.c

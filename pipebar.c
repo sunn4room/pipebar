@@ -160,7 +160,7 @@ static void entry_destroy(struct entry* entry)
     free(entry);
 }
 
-struct pbar {
+struct pipebar {
     const char* version;
     bool debug;
 
@@ -198,37 +198,37 @@ struct pbar {
     struct wl_array text[2];
     struct wl_array codepoint;
     struct wl_list part[PART_SIZE + 1];
-} pbar;
+} pipebar;
 
-static void pbar_destroy()
+static void pipebar_destroy()
 {
     struct bar *bar, *bar_tmp;
-    wl_list_for_each_safe(bar, bar_tmp, &pbar.bar, link)
+    wl_list_for_each_safe(bar, bar_tmp, &pipebar.bar, link)
     {
         bar_destroy(bar);
     }
     struct pointer *pointer, *pointer_tmp;
-    wl_list_for_each_safe(pointer, pointer_tmp, &pbar.pointer, link)
+    wl_list_for_each_safe(pointer, pointer_tmp, &pipebar.pointer, link)
     {
         pointer_destroy(pointer);
     }
-    if (pbar.zwlr_layer_shell != NULL) zwlr_layer_shell_v1_destroy(pbar.zwlr_layer_shell);
-    if (pbar.wp_viewporter != NULL) wp_viewporter_destroy(pbar.wp_viewporter);
-    if (pbar.wp_fractional_scale_manager != NULL) wp_fractional_scale_manager_v1_destroy(pbar.wp_fractional_scale_manager);
-    if (pbar.wl_shm != NULL) wl_shm_release(pbar.wl_shm);
-    if (pbar.wl_compositor != NULL) wl_compositor_destroy(pbar.wl_compositor);
-    if (pbar.wl_registry != NULL) wl_registry_destroy(pbar.wl_registry);
-    if (pbar.wl_display != NULL) wl_display_disconnect(pbar.wl_display);
-    wl_array_release(&pbar.color);
-    wl_array_release(&pbar.font);
-    wl_array_release(&pbar.output);
-    wl_array_release(&pbar.seat);
+    if (pipebar.zwlr_layer_shell != NULL) zwlr_layer_shell_v1_destroy(pipebar.zwlr_layer_shell);
+    if (pipebar.wp_viewporter != NULL) wp_viewporter_destroy(pipebar.wp_viewporter);
+    if (pipebar.wp_fractional_scale_manager != NULL) wp_fractional_scale_manager_v1_destroy(pipebar.wp_fractional_scale_manager);
+    if (pipebar.wl_shm != NULL) wl_shm_release(pipebar.wl_shm);
+    if (pipebar.wl_compositor != NULL) wl_compositor_destroy(pipebar.wl_compositor);
+    if (pipebar.wl_registry != NULL) wl_registry_destroy(pipebar.wl_registry);
+    if (pipebar.wl_display != NULL) wl_display_disconnect(pipebar.wl_display);
+    wl_array_release(&pipebar.color);
+    wl_array_release(&pipebar.font);
+    wl_array_release(&pipebar.output);
+    wl_array_release(&pipebar.seat);
     for (int i = 0; i < 2; i++) {
-        wl_array_release(&pbar.text[i]);
+        wl_array_release(&pipebar.text[i]);
     }
     for (int part_idx = PART_LEFT; part_idx <= PART_SIZE; part_idx++) {
         struct entry *entry, *entry_tmp;
-        wl_list_for_each_safe(entry, entry_tmp, &pbar.part[part_idx], link)
+        wl_list_for_each_safe(entry, entry_tmp, &pipebar.part[part_idx], link)
         {
             entry_destroy(entry);
         }
@@ -255,7 +255,7 @@ static void msg(const int code, const char* restrict fmt, ...)
 
     if (code < NO_ERROR) return;
 
-    pbar_destroy();
+    pipebar_destroy();
     exit(code);
 }
 
@@ -314,7 +314,7 @@ static struct canvas* canvas_new(struct bar* bar)
         msg(INNER_ERROR, "failed to map shared memory file.");
     }
     pixman_image_t* image = pixman_image_create_bits(PIXMAN_a8r8g8b8, bar->canvas_width, bar->canvas_height, mmapped, bar->canvas_width * 4);
-    struct wl_shm_pool* pool = wl_shm_create_pool(pbar.wl_shm, fd, bar->canvas_width * bar->canvas_height * 4);
+    struct wl_shm_pool* pool = wl_shm_create_pool(pipebar.wl_shm, fd, bar->canvas_width * bar->canvas_height * 4);
     struct wl_buffer* wl_buffer = wl_shm_pool_create_buffer(pool, 0, bar->canvas_width, bar->canvas_height, bar->canvas_width * 4, WL_SHM_FORMAT_ARGB8888);
     wl_shm_pool_destroy(pool);
     close(fd);
@@ -348,7 +348,7 @@ static struct bar* bar_new(struct wl_output* wl_output, uint32_t name)
         wl_list_init(&bar->part[part_idx]);
     }
     wl_list_init(&bar->canvas);
-    wl_list_insert(&pbar.bar, &bar->link);
+    wl_list_insert(&pipebar.bar, &bar->link);
     return bar;
 }
 
@@ -357,36 +357,36 @@ static struct pointer* pointer_new(struct wl_seat* wl_seat, uint32_t name)
     struct pointer* pointer = calloc(1, sizeof(struct pointer));
     pointer->wl_seat = wl_seat;
     pointer->wl_seat_name = name;
-    wl_list_insert(&pbar.pointer, &pointer->link);
+    wl_list_insert(&pipebar.pointer, &pointer->link);
     return pointer;
 }
 
 static struct entry* entry_new()
 {
     struct entry* entry = calloc(1, sizeof(struct entry));
-    wl_list_insert(&pbar.part[PART_SIZE], &entry->link);
+    wl_list_insert(&pipebar.part[PART_SIZE], &entry->link);
     return entry;
 }
 
-static void pbar_init()
+static void pipebar_init()
 {
     fcft_init(FCFT_LOG_COLORIZE_AUTO, false, FCFT_LOG_CLASS_ERROR);
-    wl_array_init(&pbar.color);
-    wl_array_init(&pbar.font);
-    wl_array_init(&pbar.output);
-    wl_array_init(&pbar.seat);
-    wl_list_init(&pbar.bar);
-    wl_list_init(&pbar.pointer);
+    wl_array_init(&pipebar.color);
+    wl_array_init(&pipebar.font);
+    wl_array_init(&pipebar.output);
+    wl_array_init(&pipebar.seat);
+    wl_list_init(&pipebar.bar);
+    wl_list_init(&pipebar.pointer);
     for (int i = 0; i < 2; i++) {
-        wl_array_init(&pbar.text[i]);
-        wl_array_add(&pbar.text[i], 256);
-        pbar.text[i].size = 0;
+        wl_array_init(&pipebar.text[i]);
+        wl_array_add(&pipebar.text[i], 256);
+        pipebar.text[i].size = 0;
     }
-    wl_array_init(&pbar.codepoint);
-    wl_array_add(&pbar.codepoint, 256);
-    pbar.codepoint.size = 0;
+    wl_array_init(&pipebar.codepoint);
+    wl_array_add(&pipebar.codepoint, 256);
+    pipebar.codepoint.size = 0;
     for (int part_idx = PART_LEFT; part_idx <= PART_SIZE; part_idx++) {
-        wl_list_init(&pbar.part[part_idx]);
+        wl_list_init(&pipebar.part[part_idx]);
     }
 }
 
@@ -429,7 +429,7 @@ static void wp_fractional_scale_handle_preferred_scale(void* data, struct wp_fra
     sprintf(dpi, "dpi=%u", 96 * bar->scale / 120);
     bar->canvas_height = 0;
     char** font_name;
-    wl_array_for_each(font_name, &pbar.font)
+    wl_array_for_each(font_name, &pipebar.font)
     {
         font = wl_array_add(&bar->font, sizeof(struct fcft_font*));
         *font = fcft_from_name(1, (const char*[]) { *font_name }, dpi);
@@ -449,7 +449,7 @@ static void zwlr_layer_surface_handle_configure(void* data, struct zwlr_layer_su
     zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface, serial);
     struct bar* bar = data;
     bar->width = width;
-    wp_viewport_set_destination(bar->wp_viewport, bar->width, pbar.height);
+    wp_viewport_set_destination(bar->wp_viewport, bar->width, pipebar.height);
     bar->canvas_width = bar->width * bar->scale / 120;
     bar->redraw = true;
 }
@@ -475,11 +475,11 @@ static void wl_output_handle_done(void* data, struct wl_output* wl_output)
 {
     struct bar* bar = data;
     if (!bar->managed) {
-        if (pbar.outputs == NULL) {
+        if (pipebar.outputs == NULL) {
             bar->managed = true;
         } else {
             char** name;
-            wl_array_for_each(name, &pbar.output)
+            wl_array_for_each(name, &pipebar.output)
             {
                 if (strcmp(*name, bar->name) == 0) {
                     bar->managed = true;
@@ -493,21 +493,21 @@ static void wl_output_handle_done(void* data, struct wl_output* wl_output)
             return;
         }
 
-        bar->wl_surface = wl_compositor_create_surface(pbar.wl_compositor);
-        bar->wp_viewport = wp_viewporter_get_viewport(pbar.wp_viewporter, bar->wl_surface);
-        bar->wp_fractional_scale = wp_fractional_scale_manager_v1_get_fractional_scale(pbar.wp_fractional_scale_manager, bar->wl_surface);
+        bar->wl_surface = wl_compositor_create_surface(pipebar.wl_compositor);
+        bar->wp_viewport = wp_viewporter_get_viewport(pipebar.wp_viewporter, bar->wl_surface);
+        bar->wp_fractional_scale = wp_fractional_scale_manager_v1_get_fractional_scale(pipebar.wp_fractional_scale_manager, bar->wl_surface);
         wp_fractional_scale_v1_add_listener(bar->wp_fractional_scale, &wp_fractional_scale_listener, bar);
-        bar->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(pbar.zwlr_layer_shell, bar->wl_surface, bar->wl_output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "statusbar");
+        bar->zwlr_layer_surface = zwlr_layer_shell_v1_get_layer_surface(pipebar.zwlr_layer_shell, bar->wl_surface, bar->wl_output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "statusbar");
         zwlr_layer_surface_v1_add_listener(bar->zwlr_layer_surface, &zwlr_layer_surface_listener, bar);
-        zwlr_layer_surface_v1_set_anchor(bar->zwlr_layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT | (pbar.bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP));
-        zwlr_layer_surface_v1_set_margin(bar->zwlr_layer_surface, pbar.gap, pbar.gap, pbar.gap, pbar.gap);
-        zwlr_layer_surface_v1_set_exclusive_zone(bar->zwlr_layer_surface, pbar.height);
-        zwlr_layer_surface_v1_set_size(bar->zwlr_layer_surface, 0, pbar.height);
+        zwlr_layer_surface_v1_set_anchor(bar->zwlr_layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT | (pipebar.bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP));
+        zwlr_layer_surface_v1_set_margin(bar->zwlr_layer_surface, pipebar.gap, pipebar.gap, pipebar.gap, pipebar.gap);
+        zwlr_layer_surface_v1_set_exclusive_zone(bar->zwlr_layer_surface, pipebar.height);
+        zwlr_layer_surface_v1_set_size(bar->zwlr_layer_surface, 0, pipebar.height);
         wl_surface_commit(bar->wl_surface);
         return;
     }
 
-    zwlr_layer_surface_v1_set_size(bar->zwlr_layer_surface, 0, pbar.height);
+    zwlr_layer_surface_v1_set_size(bar->zwlr_layer_surface, 0, pipebar.height);
 }
 
 static void wl_output_handle_scale(void* data, struct wl_output* wl_output, int32_t factor) { }
@@ -549,12 +549,12 @@ static void wl_pointer_handle_motion(void* data, struct wl_pointer* wl_pointer, 
 static void action(struct pointer* pointer, int item_idx)
 {
     struct bar* bar;
-    wl_list_for_each(bar, &pbar.bar, link)
+    wl_list_for_each(bar, &pipebar.bar, link)
     {
         if (bar->wl_surface == pointer->wl_surface) {
             if (!bar->redraw) {
                 uint32_t x = pointer->x * bar->canvas_width / bar->width;
-                uint32_t y = pointer->y * bar->canvas_height / pbar.height;
+                uint32_t y = pointer->y * bar->canvas_height / pipebar.height;
 
                 struct block* block;
                 for (int part_idx = PART_LEFT; part_idx < PART_SIZE; part_idx++) {
@@ -583,7 +583,7 @@ static void wl_pointer_handle_button(void* data, struct wl_pointer* wl_pointer, 
 
     struct pointer* pointer = data;
 
-    if (time - pointer->time < pbar.throttle) {
+    if (time - pointer->time < pipebar.throttle) {
         return;
     } else {
         pointer->time = time;
@@ -602,7 +602,7 @@ static void wl_pointer_handle_axis(void* data, struct wl_pointer* wl_pointer, ui
 {
     struct pointer* pointer = data;
 
-    if (time - pointer->time < pbar.throttle) {
+    if (time - pointer->time < pipebar.throttle) {
         return;
     } else {
         pointer->time = time;
@@ -645,11 +645,11 @@ static void wl_seat_handle_capabilities(void* data, struct wl_seat* wl_seat, uin
 {
     struct pointer* pointer = data;
     if (!pointer->managed) {
-        if (pbar.seats == NULL) {
+        if (pipebar.seats == NULL) {
             pointer->managed = true;
         } else {
             char** name;
-            wl_array_for_each(name, &pbar.seat)
+            wl_array_for_each(name, &pipebar.seat)
             {
                 if (strcmp(*name, pointer->name) == 0) {
                     pointer->managed = true;
@@ -685,20 +685,20 @@ static const struct wl_seat_listener wl_seat_listener = {
 static void wl_registry_handle_global(void* data, struct wl_registry* wl_registry, uint32_t name, const char* interface, uint32_t version)
 {
     if (!strcmp(interface, wl_compositor_interface.name)) {
-        pbar.wl_compositor = wl_registry_bind(wl_registry, name, &wl_compositor_interface, 3);
-        pbar.wl_compositor_name = name;
+        pipebar.wl_compositor = wl_registry_bind(wl_registry, name, &wl_compositor_interface, 3);
+        pipebar.wl_compositor_name = name;
     } else if (!strcmp(interface, wl_shm_interface.name)) {
-        pbar.wl_shm = wl_registry_bind(wl_registry, name, &wl_shm_interface, 2);
-        pbar.wl_shm_name = name;
+        pipebar.wl_shm = wl_registry_bind(wl_registry, name, &wl_shm_interface, 2);
+        pipebar.wl_shm_name = name;
     } else if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name)) {
-        pbar.wp_fractional_scale_manager = wl_registry_bind(wl_registry, name, &wp_fractional_scale_manager_v1_interface, 1);
-        pbar.zwlr_layer_shell_name = name;
+        pipebar.wp_fractional_scale_manager = wl_registry_bind(wl_registry, name, &wp_fractional_scale_manager_v1_interface, 1);
+        pipebar.zwlr_layer_shell_name = name;
     } else if (!strcmp(interface, wp_viewporter_interface.name)) {
-        pbar.wp_viewporter = wl_registry_bind(wl_registry, name, &wp_viewporter_interface, 1);
-        pbar.wp_viewporter_name = name;
+        pipebar.wp_viewporter = wl_registry_bind(wl_registry, name, &wp_viewporter_interface, 1);
+        pipebar.wp_viewporter_name = name;
     } else if (!strcmp(interface, zwlr_layer_shell_v1_interface.name)) {
-        pbar.zwlr_layer_shell = wl_registry_bind(wl_registry, name, &zwlr_layer_shell_v1_interface, 3);
-        pbar.zwlr_layer_shell_name = name;
+        pipebar.zwlr_layer_shell = wl_registry_bind(wl_registry, name, &zwlr_layer_shell_v1_interface, 3);
+        pipebar.zwlr_layer_shell_name = name;
     } else if (!strcmp(interface, wl_output_interface.name)) {
         struct bar* bar = bar_new(wl_registry_bind(wl_registry, name, &wl_output_interface, 4), name);
         wl_output_add_listener(bar->wl_output, &wl_output_listener, bar);
@@ -710,19 +710,19 @@ static void wl_registry_handle_global(void* data, struct wl_registry* wl_registr
 
 static void wl_registry_handle_global_remove(void* data, struct wl_registry* wl_registry, uint32_t name)
 {
-    if (name == pbar.wl_compositor_name) {
+    if (name == pipebar.wl_compositor_name) {
         msg(INNER_ERROR, "Wayland compositor removed.");
-    } else if (name == pbar.wl_shm_name) {
+    } else if (name == pipebar.wl_shm_name) {
         msg(INNER_ERROR, "Wayland shared memory removed.");
-    } else if (name == pbar.wp_fractional_scale_manager_name) {
+    } else if (name == pipebar.wp_fractional_scale_manager_name) {
         msg(INNER_ERROR, "Wayland fractional scale manager removed.");
-    } else if (name == pbar.wp_viewporter_name) {
+    } else if (name == pipebar.wp_viewporter_name) {
         msg(INNER_ERROR, "Wayland viewporter removed.");
-    } else if (name == pbar.zwlr_layer_shell_name) {
+    } else if (name == pipebar.zwlr_layer_shell_name) {
         msg(INNER_ERROR, "Wayland layer shell removed.");
     } else {
         struct bar *bar, *bar_tmp;
-        wl_list_for_each_safe(bar, bar_tmp, &pbar.bar, link)
+        wl_list_for_each_safe(bar, bar_tmp, &pipebar.bar, link)
         {
             if (name == bar->wl_output_name) {
                 bar_destroy(bar);
@@ -730,7 +730,7 @@ static void wl_registry_handle_global_remove(void* data, struct wl_registry* wl_
             }
         }
         struct pointer *pointer, *pointer_tmp;
-        wl_list_for_each_safe(pointer, pointer_tmp, &pbar.pointer, link)
+        wl_list_for_each_safe(pointer, pointer_tmp, &pipebar.pointer, link)
         {
             if (name == pointer->wl_seat_name) {
                 pointer_destroy(pointer);
@@ -751,12 +751,12 @@ static void set_pipe()
     fstat(STDIN_FILENO, &stdin_stat);
     if (!S_ISFIFO(stdin_stat.st_mode)) {
         msg(NO_ERROR,
-            "Pbar is a featherweight text-rendering wayland statusbar.\n"
+            "pipebar is a featherweight text-rendering wayland statusbar.\n"
             "It renders utf-8 sequence from STDIN line by line.\n"
             "It prints mouse pointer event actions to STDOUT.\n"
             "\n"
             "        version         %s\n"
-            "        usage           producer | pbar [options] | consumer\n"
+            "        usage           producer | pipebar [options] | consumer\n"
             "\n"
             "Options are:\n"
             "        -c color,...    set colors list (000000ff,ffffffff)\n"
@@ -819,7 +819,7 @@ static void set_pipe()
             "action can be:\n"
             "        xxx             anything except for '\\x1f'\n"
             "\n",
-            pbar.version);
+            pipebar.version);
     }
 
     setvbuf(stdout, NULL, _IOLBF, 0);
@@ -829,15 +829,15 @@ static void parse()
 {
     for (int part_idx = 0; part_idx < PART_SIZE; part_idx++) {
         struct entry *entry, *entry_tmp;
-        wl_list_for_each_reverse_safe(entry, entry_tmp, &pbar.part[part_idx], link)
+        wl_list_for_each_reverse_safe(entry, entry_tmp, &pipebar.part[part_idx], link)
         {
             wl_list_remove(&entry->link);
-            wl_list_insert(&pbar.part[PART_SIZE], &entry->link);
+            wl_list_insert(&pipebar.part[PART_SIZE], &entry->link);
         }
     }
 
-    const char* reader = pbar.text[0].data;
-    for (int part_idx = PART_LEFT; (void*)reader < pbar.text[0].data + pbar.text[0].size; part_idx++) {
+    const char* reader = pipebar.text[0].data;
+    for (int part_idx = PART_LEFT; (void*)reader < pipebar.text[0].data + pipebar.text[0].size; part_idx++) {
         if (part_idx == PART_SIZE) {
             msg(WARNING, "too many delimiters.");
             break;
@@ -845,33 +845,33 @@ static void parse()
 
         struct entry entry = {
             .item = {
-                { .value = "0", .last = &pbar.part[part_idx] },
-                { .value = "1", .last = &pbar.part[part_idx] },
-                { .value = "0", .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
-                { .value = NULL, .last = &pbar.part[part_idx] },
+                { .value = "0", .last = &pipebar.part[part_idx] },
+                { .value = "1", .last = &pipebar.part[part_idx] },
+                { .value = "0", .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
+                { .value = NULL, .last = &pipebar.part[part_idx] },
             },
         };
 
         for (bool escape = false, delimiter = false;
-            !delimiter && (void*)reader < pbar.text[0].data + pbar.text[0].size;
+            !delimiter && (void*)reader < pipebar.text[0].data + pipebar.text[0].size;
             escape = !escape, reader = reader + strlen(reader) + 1) {
 
             if (!escape) {
-                struct entry* insert_entry = wl_container_of(pbar.part[PART_SIZE].prev, insert_entry, link);
-                if (&insert_entry->link == &pbar.part[PART_SIZE]) {
+                struct entry* insert_entry = wl_container_of(pipebar.part[PART_SIZE].prev, insert_entry, link);
+                if (&insert_entry->link == &pipebar.part[PART_SIZE]) {
                     insert_entry = entry_new();
                 }
                 wl_list_remove(&insert_entry->link);
                 *insert_entry = entry;
                 insert_entry->text = reader;
-                wl_list_insert(&pbar.part[part_idx], &insert_entry->link);
+                wl_list_insert(&pipebar.part[part_idx], &insert_entry->link);
             } else {
                 if (reader[0] == 'D') {
                     delimiter = true;
@@ -879,8 +879,8 @@ static void parse()
                     const char* tmp_color = entry.item[ITEM_BG].value;
                     entry.item[ITEM_BG].value = entry.item[ITEM_FG].value;
                     entry.item[ITEM_FG].value = tmp_color;
-                    entry.item[ITEM_BG].last = pbar.part[part_idx].next;
-                    entry.item[ITEM_FG].last = pbar.part[part_idx].next;
+                    entry.item[ITEM_BG].last = pipebar.part[part_idx].next;
+                    entry.item[ITEM_FG].last = pipebar.part[part_idx].next;
                 } else {
                     int item_idx = ITEM_SIZE;
                     switch (reader[0]) {
@@ -926,9 +926,9 @@ static void parse()
 
                     if (reader[1] != '\0') {
                         item->value = reader + 1;
-                        item->last = pbar.part[part_idx].next;
+                        item->last = pipebar.part[part_idx].next;
                     } else {
-                        if (item->last != &pbar.part[part_idx]) {
+                        if (item->last != &pipebar.part[part_idx]) {
                             const struct entry* last_entry = wl_container_of(item->last, last_entry, link);
                             item->value = last_entry->item[item_idx].value;
                             item->last = last_entry->item[item_idx].last;
@@ -942,7 +942,7 @@ static void parse()
     }
 
     struct bar* bar;
-    wl_list_for_each(bar, &pbar.bar, link)
+    wl_list_for_each(bar, &pipebar.bar, link)
     {
         bar->redraw = true;
     }
@@ -980,7 +980,7 @@ static void draw(struct bar* bar)
     }
 
     struct fcft_font** font = bar->font.data;
-    pixman_color_t* color = pbar.color.data;
+    pixman_color_t* color = pipebar.color.data;
 
     pixman_box32_t bar_box = { 0, 0, canvas->width, canvas->height };
     pixman_image_fill_boxes(PIXMAN_OP_SRC, canvas->image, color, 1, &bar_box);
@@ -989,7 +989,7 @@ static void draw(struct bar* bar)
         uint32_t part_width = 0;
         struct entry* entry;
         struct block* block;
-        wl_list_for_each_reverse(entry, &pbar.part[part_idx], link)
+        wl_list_for_each_reverse(entry, &pipebar.part[part_idx], link)
         {
             if (entry->text[0] == '\0') continue;
             if (entry->item[ITEM_OUTPUT].value != NULL) {
@@ -1011,13 +1011,13 @@ static void draw(struct bar* bar)
             block->entry = entry;
 
             int bg_idx = strtoul(entry->item[ITEM_BG].value, NULL, 10);
-            if ((void*)(color + bg_idx) >= pbar.color.data + pbar.color.size) {
+            if ((void*)(color + bg_idx) >= pipebar.color.data + pipebar.color.size) {
                 msg(WARNING, "bg color index %ud is out of range. fallback to 0.", bg_idx);
                 bg_idx = 0;
             }
             block->bg = color + bg_idx;
             int fg_idx = strtoul(entry->item[ITEM_FG].value, NULL, 10);
-            if ((void*)(color + fg_idx) >= pbar.color.data + pbar.color.size) {
+            if ((void*)(color + fg_idx) >= pipebar.color.data + pipebar.color.size) {
                 msg(WARNING, "fg color index %ud is out of range. fallback to 1.", fg_idx);
                 fg_idx = 1;
             }
@@ -1032,10 +1032,10 @@ static void draw(struct bar* bar)
             block->height = block->font->height;
             block->base = (block->font->height + block->font->descent + block->font->ascent) / 2 - (block->font->descent > 0 ? block->font->descent : 0);
 
-            pbar.codepoint.size = 0;
+            pipebar.codepoint.size = 0;
             const char* reader = entry->text;
             while (reader[0] != '\0') {
-                uint32_t* codepoint = wl_array_add(&pbar.codepoint, 4);
+                uint32_t* codepoint = wl_array_add(&pipebar.codepoint, 4);
                 if ((reader[0] & 0b10000000) == 0b00000000) {
                     *codepoint = reader[0];
                     reader += 1;
@@ -1061,7 +1061,7 @@ static void draw(struct bar* bar)
                     msg(RUNTIME_ERROR, "invalid utf-8 character sequence.");
                 }
             }
-            block->run = fcft_rasterize_text_run_utf32(block->font, pbar.codepoint.size / 4, pbar.codepoint.data, FCFT_SUBPIXEL_DEFAULT);
+            block->run = fcft_rasterize_text_run_utf32(block->font, pipebar.codepoint.size / 4, pipebar.codepoint.data, FCFT_SUBPIXEL_DEFAULT);
             block->width = 0;
             for (int i = 0; i < block->run->count; i++) {
                 block->width += block->run->glyphs[i]->advance.x;
@@ -1158,50 +1158,50 @@ char default_fonts[] = "monospace";
 
 static void init(int argc, char** argv)
 {
-    pbar_init();
+    pipebar_init();
 
-    pbar.version = "3.3";
+    pipebar.version = "3.3";
 
-    pbar.colors = default_colors;
-    pbar.fonts = default_fonts;
-    pbar.outputs = NULL;
-    pbar.seats = NULL;
-    pbar.bottom = false;
-    pbar.gap = 0;
-    pbar.throttle = 100;
-    pbar.replace = "{}";
+    pipebar.colors = default_colors;
+    pipebar.fonts = default_fonts;
+    pipebar.outputs = NULL;
+    pipebar.seats = NULL;
+    pipebar.bottom = false;
+    pipebar.gap = 0;
+    pipebar.throttle = 100;
+    pipebar.replace = "{}";
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-c") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
-                pbar.colors = argv[i];
+                pipebar.colors = argv[i];
             } else {
                 msg(RUNTIME_ERROR, "option %s requires an argument.", argv[i - 1]);
             }
         } else if (strcmp(argv[i], "-f") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
-                pbar.fonts = argv[i];
+                pipebar.fonts = argv[i];
             } else {
                 msg(RUNTIME_ERROR, "option %s requires an argument.", argv[i - 1]);
             }
         } else if (strcmp(argv[i], "-o") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
-                pbar.outputs = argv[i];
+                pipebar.outputs = argv[i];
             } else {
                 msg(RUNTIME_ERROR, "option %s requires an argument.", argv[i - 1]);
             }
         } else if (strcmp(argv[i], "-s") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
-                pbar.seats = argv[i];
+                pipebar.seats = argv[i];
             } else {
                 msg(RUNTIME_ERROR, "option %s requires an argument.", argv[i - 1]);
             }
         } else if (strcmp(argv[i], "-b") == 0) {
-            pbar.bottom = true;
+            pipebar.bottom = true;
         } else if (strcmp(argv[i], "-g") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
                 char* endptr;
-                pbar.gap = strtoul(argv[i], &endptr, 10);
+                pipebar.gap = strtoul(argv[i], &endptr, 10);
                 if (*endptr != '\0') {
                     msg(RUNTIME_ERROR, "option %s got a invalid argument: %s.", argv[i - 1], argv[i]);
                 }
@@ -1211,7 +1211,7 @@ static void init(int argc, char** argv)
         } else if (strcmp(argv[i], "-i") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
                 char* endptr;
-                pbar.throttle = strtoul(argv[i], &endptr, 10);
+                pipebar.throttle = strtoul(argv[i], &endptr, 10);
                 if (*endptr != '\0') {
                     msg(RUNTIME_ERROR, "option %s got a invalid argument: %s.", argv[i - 1], argv[i]);
                 }
@@ -1220,14 +1220,14 @@ static void init(int argc, char** argv)
             }
         } else if (strcmp(argv[i], "-r") == 0) {
             if (++i < argc && argv[i][0] != '\0') {
-                pbar.replace = argv[i];
+                pipebar.replace = argv[i];
             } else {
                 msg(RUNTIME_ERROR, "option %s requires an argument.", argv[i - 1]);
             }
         }
     }
 
-    for (char *head = pbar.colors, *reader = pbar.colors;; reader++) {
+    for (char *head = pipebar.colors, *reader = pipebar.colors;; reader++) {
         if (reader[0] != ',' && reader[0] != '\0') continue;
         bool end = false;
         if (reader[0] == '\0') {
@@ -1235,7 +1235,7 @@ static void init(int argc, char** argv)
         } else {
             reader[0] = '\0';
         }
-        pixman_color_t* color = wl_array_add(&pbar.color, sizeof(pixman_color_t));
+        pixman_color_t* color = wl_array_add(&pipebar.color, sizeof(pixman_color_t));
         *color = strtocolor(head);
         if (end) {
             break;
@@ -1243,11 +1243,11 @@ static void init(int argc, char** argv)
             head = reader + 1;
         }
     }
-    if (pbar.color.size == sizeof(pixman_color_t)) {
+    if (pipebar.color.size == sizeof(pixman_color_t)) {
         msg(RUNTIME_ERROR, "option -c need at least two color.");
     }
 
-    for (char *head = pbar.fonts, *reader = pbar.fonts;; reader++) {
+    for (char *head = pipebar.fonts, *reader = pipebar.fonts;; reader++) {
         if (reader[0] != ',' && reader[0] != '\0') continue;
         bool end = false;
         if (reader[0] == '\0') {
@@ -1255,11 +1255,11 @@ static void init(int argc, char** argv)
         } else {
             reader[0] = '\0';
         }
-        char** name = wl_array_add(&pbar.font, sizeof(char*));
+        char** name = wl_array_add(&pipebar.font, sizeof(char*));
         *name = head;
         struct fcft_font* font = fcft_from_name(1, (const char*[]) { *name }, "dpi=96");
-        if (font->height > pbar.height) {
-            pbar.height = font->height;
+        if (font->height > pipebar.height) {
+            pipebar.height = font->height;
         }
         fcft_destroy(font);
         if (end) {
@@ -1269,10 +1269,10 @@ static void init(int argc, char** argv)
         }
     }
 
-    if (pbar.outputs != NULL) {
-        for (char *head = pbar.outputs, *reader = pbar.outputs;; reader++) {
+    if (pipebar.outputs != NULL) {
+        for (char *head = pipebar.outputs, *reader = pipebar.outputs;; reader++) {
             if (reader[0] != ',' && reader[0] != '\0') continue;
-            char** name = wl_array_add(&pbar.output, sizeof(char*));
+            char** name = wl_array_add(&pipebar.output, sizeof(char*));
             *name = head;
             if (reader[0] == '\0') {
                 break;
@@ -1283,10 +1283,10 @@ static void init(int argc, char** argv)
         }
     }
 
-    if (pbar.seats != NULL) {
-        for (char *head = pbar.seats, *reader = pbar.seats;; reader++) {
+    if (pipebar.seats != NULL) {
+        for (char *head = pipebar.seats, *reader = pipebar.seats;; reader++) {
             if (reader[0] != ',' && reader[0] != '\0') continue;
-            char** name = wl_array_add(&pbar.seat, sizeof(char*));
+            char** name = wl_array_add(&pipebar.seat, sizeof(char*));
             *name = head;
             if (reader[0] == '\0') {
                 break;
@@ -1306,25 +1306,25 @@ static void setup()
         msg(INNER_ERROR, "fcft version is lower then 2.4.0.");
     }
 
-    pbar.wl_display = wl_display_connect(NULL);
-    if (pbar.wl_display == NULL) {
+    pipebar.wl_display = wl_display_connect(NULL);
+    if (pipebar.wl_display == NULL) {
         msg(INNER_ERROR, "failed to connect to wayland display.");
     }
 
-    pbar.wl_registry = wl_display_get_registry(pbar.wl_display);
-    wl_registry_add_listener(pbar.wl_registry, &wl_registry_listener, NULL);
+    pipebar.wl_registry = wl_display_get_registry(pipebar.wl_display);
+    wl_registry_add_listener(pipebar.wl_registry, &wl_registry_listener, NULL);
 
-    if (wl_display_roundtrip(pbar.wl_display) < 0) {
+    if (wl_display_roundtrip(pipebar.wl_display) < 0) {
         msg(INNER_ERROR, "failed to handle wayland display event queue.");
-    } else if (pbar.wl_compositor == NULL) {
+    } else if (pipebar.wl_compositor == NULL) {
         msg(INNER_ERROR, "failed to get wayland compositor.");
-    } else if (pbar.wl_shm == NULL) {
+    } else if (pipebar.wl_shm == NULL) {
         msg(INNER_ERROR, "failed to get wayland shared memory.");
-    } else if (pbar.wp_fractional_scale_manager == NULL) {
+    } else if (pipebar.wp_fractional_scale_manager == NULL) {
         msg(INNER_ERROR, "failed to get wayland fractional scale manager.");
-    } else if (pbar.wp_viewporter == NULL) {
+    } else if (pipebar.wp_viewporter == NULL) {
         msg(INNER_ERROR, "failed to get wayland viewporter.");
-    } else if (pbar.zwlr_layer_shell == NULL) {
+    } else if (pipebar.zwlr_layer_shell == NULL) {
         msg(INNER_ERROR, "failed to get wayland layer shell.");
     }
 }
@@ -1343,7 +1343,7 @@ static void loop()
         msg(INNER_ERROR, "failed to create signal fd.");
     }
 
-    int wl_display_fd = wl_display_get_fd(pbar.wl_display);
+    int wl_display_fd = wl_display_get_fd(pipebar.wl_display);
     if (wl_display_fd < 0) {
         msg(INNER_ERROR, "failed to get wayland display fd.");
     }
@@ -1359,7 +1359,7 @@ static void loop()
     int x1f_count = 0;
     char* reader = NULL;
     while (true) {
-        wl_display_flush(pbar.wl_display);
+        wl_display_flush(pipebar.wl_display);
 
         if (poll(pfds, 3, -1) < 0) {
             msg(INNER_ERROR, "failed to wait for data using poll.");
@@ -1374,7 +1374,7 @@ static void loop()
         }
 
         if (pfds[1].revents & POLLIN) {
-            reader = wl_array_add(&pbar.text[1], 1);
+            reader = wl_array_add(&pipebar.text[1], 1);
             read(stdin_fd, reader, 1);
             if (reader[0] == '\x1f') {
                 reader[0] = '\0';
@@ -1386,10 +1386,10 @@ static void loop()
                 if (x1f_count % 2 == 0) {
                     reader[0] = '\0';
 
-                    struct wl_array text_tmp = pbar.text[0];
-                    pbar.text[0] = pbar.text[1];
-                    pbar.text[1] = text_tmp;
-                    pbar.text[1].size = 0;
+                    struct wl_array text_tmp = pipebar.text[0];
+                    pipebar.text[0] = pipebar.text[1];
+                    pipebar.text[1] = text_tmp;
+                    pipebar.text[1].size = 0;
                     x1f_count = 0;
 
                     parse();
@@ -1400,13 +1400,13 @@ static void loop()
         }
 
         if (pfds[2].revents & POLLIN) {
-            if (wl_display_dispatch(pbar.wl_display) < 0) {
+            if (wl_display_dispatch(pipebar.wl_display) < 0) {
                 msg(INNER_ERROR, "failed to handle wayland display event queue.");
             }
         }
 
         struct bar* bar;
-        wl_list_for_each(bar, &pbar.bar, link)
+        wl_list_for_each(bar, &pipebar.bar, link)
         {
             if (bar->redraw && bar->width != 0 && bar->scale != 0) {
                 draw(bar);

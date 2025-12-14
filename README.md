@@ -1,8 +1,8 @@
-# pbar
+# pipebar
 
-![](pbar.png)
+![](screenshot.png)
 
-A featherweight text-rendering wayland statusbar. `p` indicates that pbar works with anonymous pipe `|`. This bar is highly customizable and extensible.
+A featherweight text-rendering wayland statusbar. `pipe` indicates that pipebar works with anonymous pipe `|`. This bar is highly customizable and extensible.
 
 ## build
 
@@ -19,12 +19,12 @@ make
 ## usage
 
 ```
-Pbar is a featherweight text-rendering wayland statusbar.
+pipebar is a featherweight text-rendering wayland statusbar.
 It renders utf-8 sequence from STDIN line by line.
 It prints mouse pointer event actions to STDOUT.
 
         version         3.3
-        usage           producer | pbar [options] | consumer
+        usage           producer | pipebar [options] | consumer
 
 Options are:
         -c color,...    set colors list (000000ff,ffffffff)
@@ -90,7 +90,7 @@ action can be:
 
 ## convention
 
-Considering the extensibility of pbar, I make the following conventions.
+Considering the extensibility of pipebar, I make the following conventions.
 
 ### color list
 
@@ -130,7 +130,7 @@ There are some theme definitions in the themes folder.
 - use ***niri msg*** as the consumer
 
 ```sh
-i3blocks | sed --unbuffered -e '1d' -e 's/^.//' | jq --unbuffered -r 'reduce .[] as $item (""; . + $item.full_text)' | pbar | while read -r cmd; do niri msg action spawn-sh -- "$cmd"; done
+i3blocks | sed --unbuffered -e '1d' -e 's/^.//' | jq --unbuffered -r 'reduce .[] as $item (""; . + $item.full_text)' | pipebar -f monospace:size=18,sans-serif:size=18,monospace:size=12,sans-serif:size=12 -c 282a36,ffffff,363447,f0f1f4,44475a,f8f8f2,6272a4,9ea8c7,ff5555,ffb86c,f1fa8c,50fa7b,8be9fd,80bfff,ff79c6,bd93f9 | while read -r cmd; do niri msg action spawn-sh -- "$cmd"; done
 ```
 
 There are some useful scripts in the blocks folder.
