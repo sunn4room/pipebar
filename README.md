@@ -4,6 +4,13 @@
 
 A featherweight text-rendering wayland statusbar. `pipe` indicates that pipebar works with anonymous pipe `|`. This bar is highly customizable and extensible.
 
+## install
+
+```sh
+# for archlinux
+paru -S pipebar-git
+```
+
 ## build
 
 - pkg-config
