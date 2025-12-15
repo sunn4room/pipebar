@@ -876,9 +876,9 @@ static void parse()
                 if (reader[0] == 'D') {
                     delimiter = true;
                 } else if (reader[0] == 'R') {
-                    const char* tmp_color = entry.item[ITEM_BG].value;
+                    const char* color_tmp = entry.item[ITEM_BG].value;
                     entry.item[ITEM_BG].value = entry.item[ITEM_FG].value;
-                    entry.item[ITEM_FG].value = tmp_color;
+                    entry.item[ITEM_FG].value = color_tmp;
                     entry.item[ITEM_BG].last = pipebar.part[part_idx].next;
                     entry.item[ITEM_FG].last = pipebar.part[part_idx].next;
                 } else {
@@ -1016,18 +1016,21 @@ static void draw(struct bar* bar)
                 bg_idx = 0;
             }
             block->bg = color + bg_idx;
+
             int fg_idx = strtoul(entry->item[ITEM_FG].value, NULL, 10);
             if ((void*)(color + fg_idx) >= pipebar.color.data + pipebar.color.size) {
                 msg(WARNING, "fg color index %ud is out of range. fallback to 1.", fg_idx);
                 fg_idx = 1;
             }
             block->fg = color + fg_idx;
+
             int font_idx = strtoul(entry->item[ITEM_FONT].value, NULL, 10);
             if ((void*)(font + font_idx) >= bar->font.data + bar->font.size) {
                 msg(WARNING, "font index %ud is out of range. fallback to 0.", font_idx);
                 font_idx = 0;
             }
             block->font = font[font_idx];
+
             block->y = (canvas->height - block->font->height) / 2;
             block->height = block->font->height;
             block->base = (block->font->height + block->font->descent + block->font->ascent) / 2 - (block->font->descent > 0 ? block->font->descent : 0);
@@ -1073,12 +1076,12 @@ static void draw(struct bar* bar)
         wl_list_for_each_reverse(block, &bar->part[part_idx], link)
         {
             block->x = x;
-            if (block->width == 0) continue;
 
             if (block->bg != color) {
                 pixman_box32_t block_box = { block->x, block->y, block->x + block->width, block->y + block->height };
                 pixman_image_fill_boxes(PIXMAN_OP_SRC, canvas->image, block->bg, 1, &block_box);
             }
+
             for (int j = 0; j < block->run->count; j++) {
                 const struct fcft_glyph* glyph = block->run->glyphs[j];
                 if (glyph->is_color_glyph) {
